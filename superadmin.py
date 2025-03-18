@@ -10,8 +10,8 @@ def crear_superadmin():
 
     # Crear el superadmin
     nombre = "Maria"
-    contraseña = "Arquitectura"  # Cambia esto por una contraseña segura
-    superadmin = Usuario(nombre=nombre, rol='superadmin', contraseña=contraseña)
+    contrasena = "Arquitectura"  # Cambia esto por una contraseña segura
+    superadmin = Usuario(nombre=nombre, rol='superadmin', contrasena=contrasena)
     db.session.add(superadmin)
     db.session.commit()
     print("Superadmin creado correctamente.")

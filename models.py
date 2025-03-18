@@ -21,9 +21,14 @@ class Transaccion(db.Model):
     producto_id = db.Column(db.Integer, db.ForeignKey('productos.id'), nullable=False)
     cantidad = db.Column(db.Integer, nullable=False)
 
-class Usuario(UserMixin, db.Model):
-    __tablename__ = 'usuarios'
+
+
+
+class Usuario(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(100), nullable=False)
-    rol = db.Column(db.String(50), nullable=False, default='empleado')  # Rol por defecto: empleado
-    contraseña = db.Column(db.String(100), nullable=False)
+    nombre = db.Column(db.String(100), nullable=False, unique=True)
+    contrasena = db.Column(db.String(100), nullable=False)
+    rol = db.Column(db.String(50), nullable=False, default='empleado')
+
+    def __repr__(self):
+        return f'<Usuario {self.nombre}>'
