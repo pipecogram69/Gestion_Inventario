@@ -196,6 +196,18 @@ def asignar_rol(user_id):
         return redirect(url_for('index'))
 
     return render_template('asignar_rol.html', usuario=usuario)
+@app.route('/eliminar_usuario/<int:user_id>')
+@login_required
+def eliminar_usuario(user_id):
+    if current_user.rol != 'superadmin':
+        flash("No tienes permisos para acceder a esta página", "error")
+        return redirect(url_for('index'))
+
+    usuario = Usuario.query.get_or_404(user_id)
+    db.session.delete(usuario)
+    db.session.commit()
+    flash(f"Usuario {usuario.nombre} eliminado correctamente", "success")
+    return redirect(url_for('lista_usuarios'))
 @app.route('/visualizar')
 @login_required
 def visualizar():
