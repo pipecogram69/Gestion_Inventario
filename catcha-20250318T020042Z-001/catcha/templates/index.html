@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Inventarios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Inventario</h1>
+        <a href="{{ url_for('add_product') }}">Agregar producto</a>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for nombre, cantidad in inventario.items() %}
+                <tr>
+                    <td>{{ nombre }}</td>
+                    <td>{{ cantidad }}</td>
+                    <td>
+                        <a href="{{ url_for('update_product', nombre=nombre) }}">Actualizar</a> |
+                        <a href="{{ url_for('delete_product', nombre=nombre) }}">Eliminar</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if inventario %}
+        <footer>
+            <p>&copy; 2025 Gestión de Inventarios | <a href="#">Privacidad</a></p>
+        </footer>
+        {% endif %}
+    </div>
+</body>
+</html>
