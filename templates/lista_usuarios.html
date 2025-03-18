@@ -26,6 +26,10 @@
                     <td>{{ usuario.rol }}</td>
                     <td>
                         <a href="{{ url_for('asignar_rol', user_id=usuario.id) }}">Asignar Rol</a>
+                        {% if current_user.rol == 'superadmin' %}
+                            | <a href="{{ url_for('eliminar_usuario', user_id=usuario.id) }}" 
+                                 onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?')">Eliminar</a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

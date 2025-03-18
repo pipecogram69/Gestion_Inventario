@@ -22,20 +22,17 @@ def load_user(user_id):
 # Ruta principal
 @app.route('/')
 def index():
-    # Redirigir al login si el usuario no está autenticado
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
     
-    # Si el usuario está autenticado, mostrar la página principal
     productos = Producto.query.all()
     return render_template('index.html', productos=productos)
-
 
 # Ruta para agregar producto
 @app.route('/add', methods=['GET', 'POST'])
 @login_required
 def add_product():
-    if current_user.rol != ['admin','superadmin']:
+    if current_user.rol not in ['admin', 'superadmin']:
         flash("No tienes permisos para acceder a esta página", "error")
         return redirect(url_for('index'))
 
@@ -56,7 +53,6 @@ def add_product():
         db.session.add(nuevo_producto)
         db.session.commit()
 
-        # Registrar una transacción de entrada
         nueva_transaccion = Transaccion(
             tipo="entrada",
             fecha=datetime.now(),
@@ -84,11 +80,9 @@ def update_product(id):
         nuevo_stock = int(request.form['stock'])
         diferencia = nuevo_stock - producto.stock
 
-        # Actualizar el stock del producto
         producto.stock = nuevo_stock
         db.session.commit()
 
-        # Registrar una transacción
         tipo_transaccion = "entrada" if diferencia > 0 else "salida"
         nueva_transaccion = Transaccion(
             tipo=tipo_transaccion,
@@ -125,6 +119,7 @@ def delete_product(id):
 def transacciones():
     transacciones = Transaccion.query.all()
     return render_template('transacciones.html', transacciones=transacciones)
+
 @app.route('/usuarios')
 @login_required
 def lista_usuarios():
@@ -140,21 +135,18 @@ def lista_usuarios():
 def login():
     if request.method == 'POST':
         nombre = request.form['nombre']
-        contraseña = request.form['contraseña']
+        contrasena = request.form['contrasena']
         usuario = Usuario.query.filter_by(nombre=nombre).first()
 
-        if usuario and usuario.contraseña == contraseña:
+        if usuario and usuario.contrasena == contrasena:
             login_user(usuario)
             flash("Inicio de sesión exitoso", "success")
-
-            if usuario.rol in ['admin', 'superadmin']:
-                return redirect(url_for('index'))
-            else:
-                return redirect(url_for('visualizar'))
+            return redirect(url_for('index'))
         else:
             flash("Credenciales incorrectas", "error")
     
     return render_template('login.html')
+
 # Ruta para cerrar sesión
 @app.route('/logout')
 @login_required
@@ -168,10 +160,9 @@ def logout():
 def registro():
     if request.method == 'POST':
         nombre = request.form['nombre']
-        contraseña = request.form['contraseña']
+        contrasena = request.form['contrasena']
 
-        # Todos los nuevos usuarios se registran como "empleado" por defecto
-        nuevo_usuario = Usuario(nombre=nombre, rol='empleado', contraseña=contraseña)
+        nuevo_usuario = Usuario(nombre=nombre, rol='empleado', contrasena=contrasena)
         db.session.add(nuevo_usuario)
         db.session.commit()
 
@@ -196,6 +187,18 @@ def asignar_rol(user_id):
         return redirect(url_for('index'))
 
     return render_template('asignar_rol.html', usuario=usuario)
+@app.route('/eliminar_usuario/<int:user_id>')
+@login_required
+def eliminar_usuario(user_id):
+    if current_user.rol != 'superadmin':
+        flash("No tienes permisos para acceder a esta página", "error")
+        return redirect(url_for('index'))
+
+    usuario = Usuario.query.get_or_404(user_id)
+    db.session.delete(usuario)
+    db.session.commit()
+    flash(f"Usuario {usuario.nombre} eliminado correctamente", "success")
+    return redirect(url_for('lista_usuarios'))
 @app.route('/visualizar')
 @login_required
 def visualizar():
@@ -205,6 +208,7 @@ def visualizar():
 
     productos = Producto.query.all()
     return render_template('visualizar.html', productos=productos)
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
