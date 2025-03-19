@@ -25,6 +25,7 @@ class Transaccion(db.Model):
 
 
 class Usuario(db.Model, UserMixin):
+    __tablename__="usuarios"
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False, unique=True)
     contrasena = db.Column(db.String(100), nullable=False)

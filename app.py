@@ -6,12 +6,15 @@ from models import db, Producto, Transaccion, Usuario
 app = Flask(__name__)
 
 # Configuración de la base de datos PostgreSQL
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://arquitectura:inventarios@localhost/inventarios'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://arquitectura:inventarios@localhost/inventarios'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-app.secret_key = 'arq'
+app.secret_key = 'arquitectura'  # Clave secreta para manejar sesiones
+
 # Inicializar la base de datos y Flask-Login
 db.init_app(app)
+
+# Configurar LoginManager
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
@@ -19,14 +22,18 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return Usuario.query.get(int(user_id))
 
-# Ruta principal
+# Ruta principal (redirige al login si no está autenticado)
 @app.route('/')
 def index():
     if not current_user.is_authenticated:
-        return redirect(url_for('login'))
+        return redirect(url_for('login'))  # Redirigir al login si el usuario no está autenticado
     
-    productos = Producto.query.all()
-    return render_template('index.html', productos=productos)
+    # Si el usuario está autenticado, redirigir según su rol
+    if current_user.rol in ['admin', 'superadmin']:
+        productos = Producto.query.all()
+        return render_template('index.html', productos=productos)
+    else:
+        return redirect(url_for('visualizar'))
 
 # Ruta para agregar producto
 @app.route('/add', methods=['GET', 'POST'])
@@ -136,18 +143,29 @@ def login():
     if request.method == 'POST':
         nombre = request.form['nombre']
         contrasena = request.form['contrasena']
+        print(f"Intento de inicio de sesión: {nombre}")  # Depuración
         usuario = Usuario.query.filter_by(nombre=nombre).first()
 
-        if usuario and usuario.contrasena == contrasena:
-            login_user(usuario)
-            flash("Inicio de sesión exitoso", "success")
-            return redirect(url_for('index'))
-        else:
-            flash("Credenciales incorrectas", "error")
-    
-    return render_template('login.html')
+        if usuario:
+            print(f"Usuario encontrado: {usuario.nombre}")  # Depuración
+            if usuario.contrasena == contrasena:
+                print("Credenciales correctas")  # Depuración
+                login_user(usuario)
+                flash("Inicio de sesión exitoso", "success")
 
-# Ruta para cerrar sesión
+                if usuario.rol in ['admin', 'superadmin']:
+                    print("Redirigiendo a index")  # Depuración
+                    return redirect(url_for('index'))
+                else:
+                    print("Redirigiendo a visualizar")  # Depuración
+                    return redirect(url_for('visualizar'))
+            else:
+                print("Contraseña incorrecta")  # Depuración
+                flash("Credenciales incorrectas", "error")
+        else:
+            print("Usuario no encontrado")  # Depuración
+            flash("Credenciales incorrectas", "error")
+    return render_template('login.html')
 @app.route('/logout')
 @login_required
 def logout():
@@ -173,7 +191,6 @@ def registro():
 @app.route('/asignar_rol/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def asignar_rol(user_id):
-    # Solo el superadmin puede asignar roles
     if current_user.rol != 'superadmin':
         flash("No tienes permisos para acceder a esta página", "error")
         return redirect(url_for('index'))
@@ -187,6 +204,7 @@ def asignar_rol(user_id):
         return redirect(url_for('index'))
 
     return render_template('asignar_rol.html', usuario=usuario)
+
 @app.route('/eliminar_usuario/<int:user_id>')
 @login_required
 def eliminar_usuario(user_id):
@@ -199,6 +217,7 @@ def eliminar_usuario(user_id):
     db.session.commit()
     flash(f"Usuario {usuario.nombre} eliminado correctamente", "success")
     return redirect(url_for('lista_usuarios'))
+
 @app.route('/visualizar')
 @login_required
 def visualizar():
@@ -211,5 +230,5 @@ def visualizar():
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()
-    app.run(debug=True)
+        db.create_all()  # Crear las tablas si no existen
+        app.run(debug=True)
