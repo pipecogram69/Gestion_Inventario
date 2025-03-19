@@ -49,7 +49,10 @@
 
         {% if productos %}
         <footer>
-            <p>&copy; 2025 Gestión de Inventarios | <a href="#">Privacidad</a></p>
+            <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
+
+            <p>&copy; 2025 Gestión de Inventarios | </p>
+
         </footer>
         {% endif %}
     </div>
