@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventario</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='css/folder.png') }}">
+
+
 </head>
 <body>
     <div class="container">
@@ -30,7 +33,7 @@
                     <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody> 
                 {% for producto in productos %}
                 <tr>
                     <td>{{ producto.nombre }}</td>
@@ -39,8 +42,9 @@
                     <td>{{ producto.precio }}</td>
                     <td>{{ producto.stock }}</td>
                     <td>
-                        <a href="{{ url_for('update_product', id=producto.id) }}">Actualizar</a> |
-                        <a href="{{ url_for('delete_product', id=producto.id) }}">Eliminar</a>
+                        <a href="{{ url_for('update_product', id=producto.id) }}" class="btn-actualizar">Actualizar</a> |
+                        <a href="{{ url_for('delete_product', id=producto.id) }}" class="btn-eliminar">Eliminar</a>
+                        
                     </td>
                 </tr>
                 {% endfor %}

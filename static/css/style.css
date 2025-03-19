@@ -14,6 +14,9 @@ h1 {
     font-size: 28px;
     margin-bottom: 20px;
     text-align: center;
+    font-family: Boldonsed;
+    font-size: 45px; 
+
 }
 
 a {
@@ -29,13 +32,16 @@ a:hover {
    Contenedor Principal
 --------------------------------------------- */
 .container {
-    max-width: 1000px;
-    margin: 0 auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background-color: #fff;
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
 }
+
 
 /* ---------------------------------------------
    Estilos para la tabla de inventario
@@ -66,12 +72,12 @@ td {
 }
 
 td a {
-    color: #28a745;
+    color: #ffffff;
     font-weight: bold;
 }
 
 td a:hover {
-    color: #218838;
+    color: #ffffff;
 }
 
 /* ---------------------------------------------
@@ -80,7 +86,7 @@ td a:hover {
 a, button {
     text-decoration: none;
     color: white;
-    background-color: #c4ffb8;
+    background-color: #8ac0ff;
     padding: 8px 16px;
     border-radius: 4px;
     font-size: 14px;
@@ -88,6 +94,7 @@ a, button {
     display: inline-block;
     transition: background-color 0.3s ease;
 }
+
 
 a:hover, button:hover {
     background-color: #ffffff;
@@ -139,10 +146,45 @@ footer {
    Estilo para los enlaces en pie de página
 --------------------------------------------- */
 footer a {
-    color: #007bff;
+    color: #ffffff;
     text-decoration: none;
 }
 
-footer a:hover {
-    text-decoration: underline;
+
+
+/* ---------------------------------------------
+botones--------------------------------------------- */
+
+/* Estilos comunes para los enlaces */
+a {
+    text-decoration: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    text-align: center;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+/* Estilo específico para el botón de actualizar */
+.btn-actualizar {
+    background-color: #27c02c; /* Verde */
+    color: #fff;
+
+}
+
+.btn-actualizar:hover {
+    background-color: #45a049; /* Verde más oscuro al pasar el cursor */
+
+}
+
+/* Estilo específico para el botón de eliminar */
+.btn-eliminar {
+    background-color: #f44336; /* Rojo */
+    color: #ffffff;
+}
+
+.btn-eliminar:hover {
+    background-color: #da190b; /* Rojo más oscuro al pasar el cursor */
 }
