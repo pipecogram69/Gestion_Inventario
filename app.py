@@ -78,26 +78,12 @@ def add_product():
 @app.route('/update/<int:id>', methods=['GET', 'POST'])
 @login_required
 def update_product(id):
-    producto = Producto.query.get_or_404(id)
-    if current_user.rol != 'admin':
-        flash("No tienes permisos para acceder a esta página", "error")
-        return redirect(url_for('index'))
-
+    producto = Producto.query.get_or_404(id)  # Esto falla si el ID no existe
     if request.method == 'POST':
-        nuevo_stock = int(request.form['stock'])
+        nuevo_stock = int(request.form['stock'])  # Asegúrate de que el formulario envía 'stock'
         diferencia = nuevo_stock - producto.stock
 
         producto.stock = nuevo_stock
-        db.session.commit()
-
-        tipo_transaccion = "entrada" if diferencia > 0 else "salida"
-        nueva_transaccion = Transaccion(
-            tipo=tipo_transaccion,
-            fecha=datetime.now(),
-            producto_id=producto.id,
-            cantidad=abs(diferencia)
-        )
-        db.session.add(nueva_transaccion)
         db.session.commit()
 
         flash("Producto actualizado correctamente", "success")
@@ -106,14 +92,17 @@ def update_product(id):
     return render_template('update_product.html', producto=producto)
 
 # Ruta para eliminar producto
-@app.route('/delete/<int:id>')
+@app.route('/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_product(id):
-    if current_user.rol != 'admin':
-        flash("No tienes permisos para acceder a esta página", "error")
-        return redirect(url_for('index'))
+    print(f"Intentando eliminar producto con ID: {id}")  # Debug
 
     producto = Producto.query.get_or_404(id)
+
+    # Eliminar transacciones relacionadas
+    Transaccion.query.filter_by(producto_id=id).delete()
+
+    # Eliminar el producto
     db.session.delete(producto)
     db.session.commit()
 

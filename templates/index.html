@@ -34,6 +34,7 @@
             <tbody> 
                 {% for producto in productos %}
                 <tr>
+                    <td>{{ producto.id }}</td> 
                     <td>{{ producto.nombre }}</td>
                     <td>{{ producto.descripcion }}</td>
                     <td>{{ producto.categoria }}</td>
@@ -41,7 +42,11 @@
                     <td>{{ producto.stock }}</td>
                     <td>
                         <a href="{{ url_for('update_product', id=producto.id) }}" class="btn-actualizar">Actualizar</a>
-                        <a href="{{ url_for('delete_product', id=producto.id) }}" class="btn-eliminar">Eliminar</a>
+                        <form action="{{ url_for('delete_product', id=producto.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn-eliminar" onclick="confirmarEliminacion(this)">Eliminar</button>
+                        </form>
+                        
+                        
                     </td>
                 </tr>
                 {% endfor %}
@@ -55,5 +60,20 @@
         </footer>
         {% endif %}
     </div>
+    
+    <script>
+        function confirmarEliminacion(button) {
+            let confirmacion = confirm("¿Seguro que quiere eliminar este producto del stock?");
+            if (confirmacion) {
+                let form = button.closest("form");
+                console.log("Enviando formulario de eliminación:", form);  // Debug
+                form.submit(); // Envía el formulario
+            } else {
+                console.log("Eliminación cancelada por el usuario");  // Debug
+            }
+        }
+    </script>
+    
+        
 </body>
 </html>
