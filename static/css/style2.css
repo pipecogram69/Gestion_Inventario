@@ -5,29 +5,38 @@ body {
     font-family: 'Arial', sans-serif;
     background-color: #f4f7fa;
     margin: 0;
-    padding: 20px;
-    color: #333;
+    height: 100vh; /* Altura del viewport */
+    display: flex;
+    justify-content: center;  /* Centrar horizontalmente */
+    align-items: center;  /* Centrar verticalmente */
 }
 
-h1 {
+
+h1.titulo {
     color: #333;
-    font-size: 28px;
-    margin-bottom: 20px;
+    font-size: 45px;
     text-align: center;
+    margin-bottom: 20px;
 }
 
 /* ---------------------------------------------
-   Estilos para el formulario de actualizar producto
+   Contenedor Principal y Tarjeta
 --------------------------------------------- */
-.container {
-    max-width: 600px;
-    margin: 0 auto;
-    background-color: #fff;
+
+
+
+.tarjeta-actualizar {
+    background: #f8f8f8; /* Fondo ligeramente gris para resaltar el formulario */
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 105%;
+
 }
 
+/* ---------------------------------------------
+   Estilos del Formulario
+--------------------------------------------- */
 form {
     display: flex;
     flex-direction: column;
@@ -39,7 +48,7 @@ label {
     font-size: 16px;
 }
 
-input, button {
+input {
     padding: 10px;
     margin-bottom: 15px;
     border-radius: 4px;
@@ -47,63 +56,62 @@ input, button {
     font-size: 16px;
 }
 
-input[type="text"], input[type="number"] {
-    width: 100%;
-}
-
-input:focus, button:focus {
+input:focus {
     border-color: #007bff;
     outline: none;
 }
 
-button {
-    background-color: #ffc107;
+/* ---------------------------------------------
+   Botones personalizados
+--------------------------------------------- */
+
+
+/* ---------------------------------------------
+   Botón Actualizar Stock
+--------------------------------------------- */
+.btn-actualizar {
+    background: #8ac0ff; /* Azul vibrante */
     color: white;
     border: none;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #e0a800;
-}
-
-button:active {
-    background-color: #c69500;
-}
-
-/* ---------------------------------------------
-   Mensajes de éxito y error
---------------------------------------------- */
-.message {
-    padding: 10px;
-    margin: 20px 0;
+    padding: 8px 16px;  /* Más delgado (padding reducido) */
     border-radius: 5px;
-    color: #fff;
     font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    transition: 0.3s ease;
 }
 
-.message.success {
-    background-color: #28a745;
-}
-
-.message.error {
-    background-color: #dc3545;
+.btn-actualizar:hover {
+    background: #74b9ff;  /* Azul más oscuro */
 }
 
 /* ---------------------------------------------
-   Estilos para el enlace de regreso
+   Botón de regresar al inventario
+--------------------------------------------- */
+.btn-regresar {
+    background: #8ac0ff; /* Azul vibrante */
+    color: white;
+    border: none;
+    padding: 8px 16px;  /* Más delgado (padding reducido) */
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;  
+    text-align: center;  /* Centra el texto */
+    margin-top: 10px;
+    transition: 0.3s ease;
+    text-decoration: none;  /* Elimina la subrayación */
+}
+
+.btn-regresar:hover {
+    background: #74b9ff;  /* Azul más oscuro */
+}
+
+/* ---------------------------------------------
+   Estilo del enlace (en caso de otros usos)
 --------------------------------------------- */
 a {
-    color: #007bff;
-    text-decoration: none;
-    font-size: 16px;
-    text-align: center;
     display: block;
-    margin-top: 20px;
-}
-
-a:hover {
-    color: #0056b3;
+    color: #8ac0ff;
+    transition: 0.3s ease;
 }

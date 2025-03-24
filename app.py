@@ -1,3 +1,5 @@
+import os
+from subprocess import call
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import datetime
@@ -18,9 +20,37 @@ db.init_app(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
+
+# FUNCIONALIDAD PARA RESTAURAR LA BASE DE DATOS DESDE backup.sql (Se ejecuta automáticamente si no está restaurada)
+def restaurar_base_datos():
+    # Verificar si ya se restauró la base de datos para evitar restauraciones múltiples
+    if not os.path.exists('base_datos_restaurada'):
+        print("Restaurando la base de datos desde backup.sql...")
+        try:
+            # Ejecutar el comando para restaurar el backup usando psql
+            call(["psql", "-U", "postgres", "-d", "inventarios", "-f", "backup.sql"])
+
+            # Crear un marcador para evitar restauraciones múltiples
+            with open('base_datos_restaurada', 'w') as f:
+                f.write("Base de datos restaurada correctamente.")
+            print("Base de datos restaurada exitosamente.")
+        except Exception as e:
+            print(f"Error al restaurar la base de datos: {e}")
+    else:
+        print("La base de datos ya ha sido restaurada previamente. Omitiendo restauración.")
+
+
+# Ejecutar la restauración de la base de datos al iniciar la aplicación
+with app.app_context():
+    restaurar_base_datos()  # Restaurar la base de datos si es necesario
+    db.create_all()  # Crear las tablas si no existen
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return Usuario.query.get(int(user_id))
+
+
 
 # Ruta principal (redirige al login si no está autenticado)
 @app.route('/')
@@ -30,10 +60,11 @@ def index():
     
     # Si el usuario está autenticado, redirigir según su rol
     if current_user.rol in ['admin', 'superadmin']:
-        productos = Producto.query.all()
+        productos = Producto.query.order_by(Producto.id.asc()).all()  # Ordenar los productos por ID ascendente
         return render_template('index.html', productos=productos)
     else:
         return redirect(url_for('visualizar'))
+
 
 # Ruta para agregar producto
 @app.route('/add', methods=['GET', 'POST'])
@@ -81,32 +112,39 @@ def update_product(id):
     producto = Producto.query.get_or_404(id)
 
     if request.method == 'POST':
-        nuevo_stock = int(request.form['stock'])
-        diferencia = nuevo_stock - producto.stock
+        # Obtener valores del formulario (si están vacíos, mantener los actuales)
+        nuevo_stock = request.form.get('nuevo_stock', '')
+        nuevo_precio = request.form.get('nuevo_precio', '')
 
-        producto.stock = nuevo_stock
+        # Si el campo de stock no fue modificado, mantén el stock actual
+        if nuevo_stock:
+            nuevo_stock = int(nuevo_stock)
+            diferencia = nuevo_stock - producto.stock
+            producto.stock = nuevo_stock
 
-        # Registrar la transacción
-        if diferencia > 0:
-            tipo_transaccion = "entrada"
-        else:
-            tipo_transaccion = "salida"
+            # Registrar la transacción de stock solo si hay un cambio
+            if diferencia != 0:
+                tipo_transaccion = "entrada" if diferencia > 0 else "salida"
+                nueva_transaccion = Transaccion(
+                    tipo=tipo_transaccion,
+                    fecha=datetime.now(),
+                    producto_id=producto.id,
+                    cantidad=abs(diferencia)
+                )
+                db.session.add(nueva_transaccion)
 
-        nueva_transaccion = Transaccion(
-            tipo=tipo_transaccion,
-            fecha=datetime.now(),
-            producto_id=producto.id,
-            cantidad=abs(diferencia)
-        )
-        db.session.add(nueva_transaccion)
+        # Si el precio no fue modificado, mantener el actual
+        if nuevo_precio:
+            producto.precio = int(nuevo_precio.replace('.', ''))  # Convertir a entero, eliminando puntos
 
         db.session.commit()
-        db.session.expire_all()  # Forzar la actualización de la caché
+        db.session.expire_all()  # Forzar actualización de caché
 
         flash("Producto actualizado correctamente", "success")
         return redirect(url_for('index'))
     
     return render_template('update_product.html', producto=producto)
+
 # Ruta para eliminar producto
 @app.route('/delete/<int:id>', methods=['POST'])
 @login_required

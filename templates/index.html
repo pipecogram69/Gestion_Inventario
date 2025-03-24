@@ -23,11 +23,12 @@
         <table>
             <thead>
                 <tr>
-                    <th>Producto</th>
+                    <th>ID</th>
+                    <th>Nombre del Producto</th>
                     <th>Descripción</th>
                     <th>Categoría</th>
-                    <th>Precio</th>
-                    <th>Stock</th>
+                    <th>Precio </th>
+                    <th>Stock Disponible</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -54,23 +55,16 @@
         {% if productos %}
         <footer>
             <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
-            <p>&copy; 2025 Gestión de Inventarios | </p>
+            <p>&copy; 2025 Gestión de Inventarios</p>
         </footer>
         {% endif %}
     </div>
-    
+
     <script>
         function confirmarEliminacion(form) {
-            let confirmacion = confirm("¿Seguro que quiere eliminar este producto del stock?");
-            if (confirmacion) {
-                console.log("Enviando formulario de eliminación:", form);  // Debug
-                return true; // Permite el envío del formulario
-            } else {
-                console.log("Eliminación cancelada por el usuario");  // Debug
-                return false; // Cancela el envío del formulario
-            }
+            return confirm("¿Seguro que quiere eliminar este producto del stock?");
         }
     </script>
-        
+
 </body>
 </html>
