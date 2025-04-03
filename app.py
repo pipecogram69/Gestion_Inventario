@@ -21,29 +21,6 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 
-# FUNCIONALIDAD PARA RESTAURAR LA BASE DE DATOS DESDE backup.sql (Se ejecuta automáticamente si no está restaurada)
-def restaurar_base_datos():
-    # Verificar si ya se restauró la base de datos para evitar restauraciones múltiples
-    if not os.path.exists('base_datos_restaurada'):
-        print("Restaurando la base de datos desde backup.sql...")
-        try:
-            # Ejecutar el comando para restaurar el backup usando psql
-            call(["psql", "-U", "postgres", "-d", "inventarios", "-f", "backup.sql"])
-
-            # Crear un marcador para evitar restauraciones múltiples
-            with open('base_datos_restaurada', 'w') as f:
-                f.write("Base de datos restaurada correctamente.")
-            print("Base de datos restaurada exitosamente.")
-        except Exception as e:
-            print(f"Error al restaurar la base de datos: {e}")
-    else:
-        print("La base de datos ya ha sido restaurada previamente. Omitiendo restauración.")
-
-
-# Ejecutar la restauración de la base de datos al iniciar la aplicación
-with app.app_context():
-    restaurar_base_datos()  # Restaurar la base de datos si es necesario
-    db.create_all()  # Crear las tablas si no existen
 
 
 @login_manager.user_loader
