@@ -10,6 +10,8 @@ app = Flask(__name__)
 # Configuración de la base de datos PostgreSQL
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://arquitectura:inventarios@localhost/inventarios'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+DATABASE_URL = "postgresql://felipe:admin123@localhost:5432/inventarios"
+
 
 app.secret_key = 'arquitectura'  # Clave secreta para manejar sesiones
 
