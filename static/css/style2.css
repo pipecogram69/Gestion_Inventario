@@ -1,117 +1,283 @@
-/* ---------------------------------------------
-   Estilos Generales para toda la aplicación
---------------------------------------------- */
-body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f7fa;
-    margin: 0;
-    height: 100vh; /* Altura del viewport */
-    display: flex;
-    justify-content: center;  /* Centrar horizontalmente */
-    align-items: center;  /* Centrar verticalmente */
+/* Variables y reset */
+:root {
+    --primary: #3498DB;
+    --primary-dark: #2980B9;
+    --primary-light: #5DADE2;
+    --secondary: #2C3E50;
+    --accent: #ECF0F1;
+    --text: #2C3E50;
+    --text-light: #7F8C8D;
+    --border: #EDEDED;
+    --success: #27AE60;
+    --danger: #E74C3C;
+    --background: #EAF2F8;
 }
 
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-h1.titulo {
-    color: #333;
-    font-size: 45px;
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--background);
+    padding: 20px;
+}
+
+/* Contenedor principal */
+.container {
+    width: 100%;
+    max-width: 500px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(52, 152, 219, 0.1);
+    overflow: hidden;
+    border-top: 5px solid var(--primary);
+}
+
+/* Encabezado */
+.header {
+    padding: 25px 30px;
     text-align: center;
+    border-bottom: 1px solid var(--border);
+}
+
+.header h1 {
+    font-size: 1.8rem;
+    color: var(--text);
+    margin-bottom: 8px;
+    font-weight: 800;
+}
+
+.header h1 span {
+    color: var(--primary);
+}
+
+.header p {
+    color: var(--text-light);
+    font-size: 0.95rem;
+}
+
+/* Información del producto */
+.product-info-card {
+    padding: 20px;
+    background-color: var(--accent);
+    border-radius: 8px;
+    margin: 20px;
+    text-align: center;
+}
+
+.product-name {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin-bottom: 10px;
+}
+
+.product-details {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.detail-value {
+    color: var(--text-light);
+}
+
+/* Pestañas */
+.tabs-wrapper {
+    display: flex;
+    justify-content: center;
     margin-bottom: 20px;
 }
 
-/* ---------------------------------------------
-   Contenedor Principal y Tarjeta
---------------------------------------------- */
-
-
-
-.tarjeta-actualizar {
-    background: #f8f8f8; /* Fondo ligeramente gris para resaltar el formulario */
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 105%;
-
+.tab-container {
+    display: inline-flex;
+    border-bottom: 1px solid #ddd;
+    margin: 0 auto;
 }
 
-/* ---------------------------------------------
-   Estilos del Formulario
---------------------------------------------- */
-form {
-    display: flex;
-    flex-direction: column;
+.tab {
+    padding: 12px 30px;
+    cursor: pointer;
+    background: #f1f1f1;
+    margin-right: 5px;
+    border-radius: 5px 5px 0 0;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-align: center;
+    min-width: 120px;
+}
+
+.tab:last-child {
+    margin-right: 0;
+}
+
+.tab:hover {
+    background: #e0e0e0;
+}
+
+.tab.active {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.price-input {
+    position: relative;
+}
+
+.price-input::before {
+    content: "$";
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    font-weight: bold;
+}
+
+.price-input input {
+    padding-left: 25px;
+}
+
+/* Formulario */
+.update-form {
+    padding: 0 30px 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
 }
 
 label {
-    margin-bottom: 10px;
-    font-weight: bold;
-    font-size: 16px;
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 0.95rem;
 }
 
 input {
-    padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    font-size: 16px;
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s;
+    background-color: #F9F9F9;
 }
 
 input:focus {
-    border-color: #007bff;
+    border-color: var(--primary-light);
     outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
-/* ---------------------------------------------
-   Botones personalizados
---------------------------------------------- */
-
-
-/* ---------------------------------------------
-   Botón Actualizar Stock
---------------------------------------------- */
-.btn-actualizar {
-    background: #8ac0ff; /* Azul vibrante */
-    color: white;
-    border: none;
-    padding: 8px 16px;  /* Más delgado (padding reducido) */
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    width: 100%;
-    transition: 0.3s ease;
+input[readonly] {
+    background-color: #EEE;
+    color: var(--text-light);
+    cursor: not-allowed;
 }
 
-.btn-actualizar:hover {
-    background: #74b9ff;  /* Azul más oscuro */
-}
-
-/* ---------------------------------------------
-   Botón de regresar al inventario
---------------------------------------------- */
-.btn-regresar {
-    background: #8ac0ff; /* Azul vibrante */
-    color: white;
-    border: none;
-    padding: 8px 16px;  /* Más delgado (padding reducido) */
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    width: 100%;  
-    text-align: center;  /* Centra el texto */
-    margin-top: 10px;
-    transition: 0.3s ease;
-    text-decoration: none;  /* Elimina la subrayación */
-}
-
-.btn-regresar:hover {
-    background: #74b9ff;  /* Azul más oscuro */
-}
-
-/* ---------------------------------------------
-   Estilo del enlace (en caso de otros usos)
---------------------------------------------- */
-a {
+.hint {
     display: block;
-    color: #8ac0ff;
-    transition: 0.3s ease;
+    margin-top: 5px;
+    color: var(--text-light);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+/* Botones */
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.btn-update, .btn-cancel {
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1;
+    border: none;
+}
+
+.btn-update {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn-update:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.btn-cancel {
+    background-color: var(--accent);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-cancel:hover {
+    background-color: #E0E0E0;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .container {
+        padding: 15px;
+    }
+    
+    .update-form {
+        padding: 0 15px 20px;
+    }
+    
+    .tab {
+        padding: 10px 20px;
+        min-width: 100px;
+    }
 }

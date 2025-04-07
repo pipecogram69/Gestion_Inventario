@@ -5,10 +5,11 @@
     --primary-light: #5DADE2;
     --secondary: #2C3E50;
     --accent: #ECF0F1;
+    --success: #27AE60;
+    --danger: #E74C3C;
     --text: #2C3E50;
     --text-light: #7F8C8D;
     --border: #EDEDED;
-    --success: #27AE60;
     --background: #EAF2F8;
 }
 
@@ -31,25 +32,25 @@ body {
 /* Contenedor principal */
 .container {
     width: 100%;
-    max-width: 600px;
+    max-width: 500px;
     background: white;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(52, 152, 219, 0.1);
     overflow: hidden;
     border-top: 5px solid var(--primary);
+    padding: 30px;
 }
 
 /* Encabezado */
 .header {
-    padding: 25px 30px;
     text-align: center;
-    border-bottom: 1px solid var(--border);
+    margin-bottom: 25px;
 }
 
 .header h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
     color: var(--text);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     font-weight: 800;
 }
 
@@ -58,90 +59,65 @@ body {
 }
 
 .header p {
-    color: var(--text-light);
-    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 5px;
+}
+
+.header strong {
+    color: var(--primary-dark);
 }
 
 /* Formulario */
-.product-form {
-    padding: 25px 30px;
+.role-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .form-group {
-    margin-bottom: 20px;
-}
-
-.form-row {
     display: flex;
-    gap: 15px;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.half-width {
-    flex: 1;
-}
-
-label {
-    display: block;
-    margin-bottom: 8px;
-    color: var(--text);
+.form-group label {
     font-weight: 600;
+    color: var(--text);
     font-size: 0.95rem;
 }
 
-input, textarea {
-    width: 100%;
+.form-group select {
     padding: 12px 15px;
     border: 2px solid var(--border);
     border-radius: 8px;
     font-size: 1rem;
-    transition: all 0.3s;
     background-color: #F9F9F9;
+    transition: all 0.3s;
+    cursor: pointer;
 }
 
-textarea {
-    resize: vertical;
-    min-height: 80px;
-}
-
-input:focus, textarea:focus {
+.form-group select:focus {
     border-color: var(--primary-light);
     outline: none;
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-}
-
-.input-with-symbol {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.input-with-symbol span {
-    position: absolute;
-    left: 15px;
-    color: var(--text-light);
-    font-weight: bold;
-}
-
-.input-with-symbol input {
-    padding-left: 30px;
 }
 
 /* Botones */
 .form-actions {
     display: flex;
     gap: 12px;
-    margin-top: 25px;
+    margin-top: 20px;
 }
 
 .btn-submit, .btn-cancel {
-    padding: 14px;
+    padding: 12px;
     border-radius: 8px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s;
     text-decoration: none;
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
@@ -170,22 +146,35 @@ input:focus, textarea:focus {
     background-color: #E0E0E0;
 }
 
+/* Badge de rol actual */
+.current-role {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 5px;
+    background-color: rgba(52, 152, 219, 0.1);
+    color: var(--primary-dark);
+}
+
+/* Iconos */
+.icon {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
 /* Responsive */
-@media (max-width: 600px) {
-    .form-row {
-        flex-direction: column;
-        gap: 20px;
-    }
-    
-    .header h1 {
-        font-size: 1.8rem;
-    }
-    
-    .product-form {
+@media (max-width: 480px) {
+    .container {
         padding: 20px;
     }
     
     .form-actions {
         flex-direction: column;
+    }
+    
+    .header h1 {
+        font-size: 1.5rem;
     }
 }

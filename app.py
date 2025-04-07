@@ -1,206 +1,116 @@
 import os
-from subprocess import call
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from datetime import datetime
 from models import db, Producto, Transaccion, Usuario
 
 app = Flask(__name__)
 
+# Configuración de la aplicación
+# =============================
+
 # Configuración de la base de datos PostgreSQL
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://arquitectura:inventarios@localhost/inventarios'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-DATABASE_URL = "postgresql://felipe:admin123@localhost:5432/inventarios"
-
-
 app.secret_key = 'arquitectura'  # Clave secreta para manejar sesiones
 
-# Inicializar la base de datos y Flask-Login
+# Inicialización de extensiones
 db.init_app(app)
 
-# Configurar LoginManager
+# Configuración de Flask-Login
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-
-
+# Funciones auxiliares
+# ====================
 
 @login_manager.user_loader
 def load_user(user_id):
+    """Cargar usuario para Flask-Login"""
     return Usuario.query.get(int(user_id))
 
+def registrar_transaccion(tipo, producto_id, cantidad):
+    """Registra una transacción en la base de datos"""
+    nueva_transaccion = Transaccion(
+        tipo=tipo,
+        fecha=datetime.now(),
+        producto_id=producto_id,
+        cantidad=cantidad
+    )
+    db.session.add(nueva_transaccion)
 
+def verificar_permisos(roles_permitidos):
+    """Verifica si el usuario actual tiene los permisos necesarios"""
+    if current_user.rol not in roles_permitidos:
+        flash("No tienes permisos para acceder a esta página", "error")
+        return False
+    return True
 
-# Ruta principal (redirige al login si no está autenticado)
+# Rutas de autenticación
+# ======================
+
 @app.route('/')
 def index():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))  # Redirigir al login si el usuario no está autenticado
-    
-    # Si el usuario está autenticado, redirigir según su rol
-    if current_user.rol in ['admin', 'superadmin']:
-        productos = Producto.query.order_by(Producto.id.asc()).all()  # Ordenar los productos por ID ascendente
-        return render_template('index.html', productos=productos)
-    else:
-        return redirect(url_for('visualizar'))
+    """Página principal - Redirige al login"""
+    return redirect(url_for('login'))
 
-
-# Ruta para agregar producto
-@app.route('/add', methods=['GET', 'POST'])
-@login_required
-def add_product():
-    if current_user.rol not in ['admin', 'superadmin']:
-        flash("No tienes permisos para acceder a esta página", "error")
-        return redirect(url_for('index'))
-
-    if request.method == 'POST':
-        nombre = request.form['nombre']
-        descripcion = request.form.get('descripcion', '')
-        categoria = request.form['categoria']
-        precio = float(request.form['precio'])
-        stock = int(request.form['stock'])
-
-        nuevo_producto = Producto(
-            nombre=nombre,
-            descripcion=descripcion,
-            categoria=categoria,
-            precio=precio,
-            stock=stock
-        )
-        db.session.add(nuevo_producto)
-        db.session.commit()
-
-        nueva_transaccion = Transaccion(
-            tipo="entrada",
-            fecha=datetime.now(),
-            producto_id=nuevo_producto.id,
-            cantidad=stock
-        )
-        db.session.add(nueva_transaccion)
-        db.session.commit()
-
-        flash("Producto agregado correctamente", "success")
-        return redirect(url_for('index'))
-    
-    return render_template('add_product.html')
-
-# Ruta para actualizar producto
-@app.route('/update/<int:id>', methods=['GET', 'POST'])
-@login_required
-def update_product(id):
-    producto = Producto.query.get_or_404(id)
-
-    if request.method == 'POST':
-        # Obtener valores del formulario (si están vacíos, mantener los actuales)
-        nuevo_stock = request.form.get('nuevo_stock', '')
-        nuevo_precio = request.form.get('nuevo_precio', '')
-
-        # Si el campo de stock no fue modificado, mantén el stock actual
-        if nuevo_stock:
-            nuevo_stock = int(nuevo_stock)
-            diferencia = nuevo_stock - producto.stock
-            producto.stock = nuevo_stock
-
-            # Registrar la transacción de stock solo si hay un cambio
-            if diferencia != 0:
-                tipo_transaccion = "entrada" if diferencia > 0 else "salida"
-                nueva_transaccion = Transaccion(
-                    tipo=tipo_transaccion,
-                    fecha=datetime.now(),
-                    producto_id=producto.id,
-                    cantidad=abs(diferencia)
-                )
-                db.session.add(nueva_transaccion)
-
-        # Si el precio no fue modificado, mantener el actual
-        if nuevo_precio:
-            producto.precio = int(nuevo_precio.replace('.', ''))  # Convertir a entero, eliminando puntos
-
-        db.session.commit()
-        db.session.expire_all()  # Forzar actualización de caché
-
-        flash("Producto actualizado correctamente", "success")
-        return redirect(url_for('index'))
-    
-    return render_template('update_product.html', producto=producto)
-
-# Ruta para eliminar producto
-@app.route('/delete/<int:id>', methods=['POST'])
-@login_required
-def delete_product(id):
-    print(f"Intentando eliminar producto con ID: {id}")  # Debug
-
-
-    producto = Producto.query.get_or_404(id)
-
-    # Eliminar transacciones relacionadas
-    Transaccion.query.filter_by(producto_id=id).delete()
-
-
-    
-    # Eliminar el producto
-    db.session.delete(producto)
-    db.session.commit()
-
-    flash("Producto eliminado correctamente", "success")
-    return redirect(url_for('index'))
-
-# Ruta para ver transacciones
-@app.route('/transacciones')
-@login_required
-def transacciones():
-    transacciones = Transaccion.query.all()
-    return render_template('transacciones.html', transacciones=transacciones)
-
-@app.route('/usuarios')
-@login_required
-def lista_usuarios():
-    if current_user.rol != 'superadmin':
-        flash("No tienes permisos para acceder a esta página", "error")
-        return redirect(url_for('index'))
-
-    usuarios = Usuario.query.all()
-    return render_template('lista_usuarios.html', usuarios=usuarios)
-
-# Ruta para iniciar sesión
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+
     if request.method == 'POST':
         nombre = request.form['nombre']
         contrasena = request.form['contrasena']
-        print(f"Intento de inicio de sesión: {nombre}")  # Depuración
         usuario = Usuario.query.filter_by(nombre=nombre).first()
 
-        if usuario:
-            print(f"Usuario encontrado: {usuario.nombre}")  # Depuración
-            if usuario.contrasena == contrasena:
-                print("Credenciales correctas")  # Depuración
-                login_user(usuario)
-                flash("Inicio de sesión exitoso", "success")
+        if usuario and usuario.contrasena == contrasena:
+            login_user(usuario)
+            flash("Inicio de sesión exitoso", "success")
+            return redirect(url_for('inventario'))
+        
+        flash("Credenciales incorrectas", "error")
+        return redirect(url_for('login'))
+    
+    return render_template('index.html')
 
-                if usuario.rol in ['admin', 'superadmin']:
-                    print("Redirigiendo a index")  # Depuración
-                    return redirect(url_for('index'))
-                else:
-                    print("Redirigiendo a visualizar")  # Depuración
-                    return redirect(url_for('visualizar'))
-            else:
-                print("Contraseña incorrecta")  # Depuración
-                flash("Credenciales incorrectas", "error")
-        else:
-            print("Usuario no encontrado")  # Depuración
-            flash("Credenciales incorrectas", "error")
-    return render_template('login.html')
+@app.route('/inventario')
+@login_required
+def inventario():
+    """Página principal del inventario"""
+    if current_user.rol not in ['admin', 'superadmin']:
+        return redirect(url_for('visualizar'))
+    
+    # Obtener el parámetro de filtro (si existe)
+    categoria_filtro = request.args.get('categoria', '')
+    
+    # Consulta base
+    query = Producto.query.order_by(Producto.id.asc())
+    
+    # Aplicar filtro si se especificó
+    if categoria_filtro:
+        query = query.filter_by(categoria=categoria_filtro)
+    
+    productos = query.all()
+    
+    # Obtener todas las categorías únicas para el filtro
+    categorias = db.session.query(Producto.categoria).distinct().order_by(Producto.categoria).all()
+    categorias = [cat[0] for cat in categorias]
+    
+    return render_template('inventario.html', 
+                        productos=productos,
+                        categorias=categorias,
+                        categoria_filtro=categoria_filtro)
+
 @app.route('/logout')
 @login_required
 def logout():
+    """Cierra la sesión del usuario"""
     logout_user()
     flash("Sesión cerrada correctamente", "success")
     return redirect(url_for('login'))
 
-# Ruta para registro de usuarios
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
+    """Registro de nuevos usuarios (solo para empleados)"""
     if request.method == 'POST':
         nombre = request.form['nombre']
         contrasena = request.form['contrasena']
@@ -213,29 +123,140 @@ def registro():
         return redirect(url_for('login'))
     return render_template('registro.html')
 
+# Rutas de gestión de productos
+# =============================
+
+@app.route('/add', methods=['GET', 'POST'])
+@login_required
+def add_product():
+    """Añade un nuevo producto al inventario"""
+    if not verificar_permisos(['admin', 'superadmin']):
+        return redirect(url_for('inventario'))
+
+    if request.method == 'POST':
+        nuevo_producto = Producto(
+            nombre=request.form['nombre'],
+            descripcion=request.form.get('descripcion', ''),
+            categoria=request.form['categoria'],
+            precio=float(request.form['precio']),
+            stock=int(request.form['stock'])
+        )
+        db.session.add(nuevo_producto)
+        db.session.commit()
+
+        registrar_transaccion("entrada", nuevo_producto.id, nuevo_producto.stock)
+        db.session.commit()
+
+        flash("Producto agregado correctamente", "success")
+        return redirect(url_for('inventario'))
+    
+    return render_template('add_product.html')
+
+@app.route('/update/<int:product_id>', methods=['GET', 'POST'])
+@login_required
+def update_product(product_id):
+    """Actualiza un producto existente"""
+    if not verificar_permisos(['admin', 'superadmin']):
+        return redirect(url_for('inventario'))
+
+    producto = Producto.query.get_or_404(product_id)
+
+    if request.method == 'POST':
+        if 'nuevo_stock' in request.form and request.form['nuevo_stock']:
+            nuevo_stock = int(request.form['nuevo_stock'])
+            diferencia = nuevo_stock - producto.stock
+            producto.stock = nuevo_stock
+
+            if diferencia != 0:
+                tipo = "entrada" if diferencia > 0 else "salida"
+                registrar_transaccion(tipo, producto.id, abs(diferencia))
+
+        if 'nuevo_precio' in request.form and request.form['nuevo_precio']:
+            producto.precio = float(request.form['nuevo_precio'])
+
+        db.session.commit()
+        flash("Producto actualizado correctamente", "success")
+        return redirect(url_for('inventario'))
+    
+    return render_template('update_product.html', producto=producto)
+
+@app.route('/delete/<int:product_id>', methods=['POST'])
+@login_required
+def delete_product(product_id):
+    """Elimina un producto y registra la transacción correspondiente"""
+    if not verificar_permisos(['admin', 'superadmin']):
+        return redirect(url_for('inventario'))
+
+    producto = Producto.query.get_or_404(product_id)
+    
+    if producto.stock > 0:
+        registrar_transaccion("salida", producto.id, producto.stock)
+    
+    Transaccion.query.filter_by(producto_id=product_id).delete()
+    db.session.delete(producto)
+    db.session.commit()
+
+    flash("Producto eliminado correctamente", "success")
+    return redirect(url_for('inventario'))
+
+# Rutas de visualización
+# ======================
+
+@app.route('/visualizar')
+@login_required
+def visualizar():
+    """Vista de solo lectura para empleados"""
+    if not verificar_permisos(['empleado']):
+        return redirect(url_for('inventario'))
+
+    productos = Producto.query.all()
+    return render_template('visualizar.html', productos=productos)
+
+@app.route('/transacciones')
+@login_required
+def transacciones():
+    """Muestra el historial de transacciones"""
+    if not verificar_permisos(['admin', 'superadmin']):
+        return redirect(url_for('inventario'))
+
+    transacciones = Transaccion.query.all()
+    return render_template('transacciones.html', transacciones=transacciones)
+
+# Rutas de gestión de usuarios
+# ============================
+
+@app.route('/usuarios')
+@login_required
+def lista_usuarios():
+    """Lista todos los usuarios (solo superadmin)"""
+    if not verificar_permisos(['superadmin']):
+        return redirect(url_for('inventario'))
+
+    usuarios = Usuario.query.all()
+    return render_template('lista_usuarios.html', usuarios=usuarios)
+
 @app.route('/asignar_rol/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def asignar_rol(user_id):
-    if current_user.rol != 'superadmin':
-        flash("No tienes permisos para acceder a esta página", "error")
-        return redirect(url_for('index'))
+    """Cambia el rol de un usuario (solo superadmin)"""
+    if not verificar_permisos(['superadmin']):
+        return redirect(url_for('inventario'))
 
     usuario = Usuario.query.get_or_404(user_id)
     if request.method == 'POST':
-        nuevo_rol = request.form['rol']
-        usuario.rol = nuevo_rol
+        usuario.rol = request.form['rol']
         db.session.commit()
-        flash(f"Rol de {usuario.nombre} actualizado a {nuevo_rol}", "success")
-        return redirect(url_for('index'))
+        flash(f"Rol de {usuario.nombre} actualizado a {usuario.rol}", "success")
+        return redirect(url_for('inventario'))
 
     return render_template('asignar_rol.html', usuario=usuario)
 
 @app.route('/eliminar_usuario/<int:user_id>')
 @login_required
 def eliminar_usuario(user_id):
-    if current_user.rol != 'superadmin':
-        flash("No tienes permisos para acceder a esta página", "error")
-        return redirect(url_for('index'))
+    """Elimina un usuario (solo superadmin)"""
+    if not verificar_permisos(['superadmin']):
+        return redirect(url_for('inventario'))
 
     usuario = Usuario.query.get_or_404(user_id)
     db.session.delete(usuario)
@@ -243,17 +264,10 @@ def eliminar_usuario(user_id):
     flash(f"Usuario {usuario.nombre} eliminado correctamente", "success")
     return redirect(url_for('lista_usuarios'))
 
-@app.route('/visualizar')
-@login_required
-def visualizar():
-    if current_user.rol not in ['empleado']:
-        flash("No tienes permisos para acceder a esta página", "error")
-        return redirect(url_for('index'))
-
-    productos = Producto.query.all()
-    return render_template('visualizar.html', productos=productos)
+# Inicialización de la aplicación
+# ==============================
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()  # Crear las tablas si no existen
+        db.create_all()
         app.run(debug=True)

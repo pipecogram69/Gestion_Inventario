@@ -3,68 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventario</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Iniciar Sesión - Sistema de Inventario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style4.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='css/folder.png') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Inventario</h1>
-        <a href="{{ url_for('add_product') }}">Agregar producto</a>
-
-        <!-- Enlace para ver transacciones -->
-        <a href="{{ url_for('transacciones') }}">Ver Transacciones</a>
-
-        <!-- Enlace para listar usuarios (solo para superadmin) -->
-        {% if current_user.rol == 'superadmin' %}
-            <a href="{{ url_for('lista_usuarios') }}">Lista de Usuarios</a>
-        {% endif %}
-
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre del Producto</th>
-                    <th>Descripción</th>
-                    <th>Categoría</th>
-                    <th>Precio </th>
-                    <th>Stock Disponible</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for producto in productos %}
-                <tr>
-                    <td>{{ producto.id }}</td>
-                    <td>{{ producto.nombre }}</td>
-                    <td>{{ producto.descripcion }}</td>
-                    <td>{{ producto.categoria }}</td>
-                    <td>{{ producto.precio }}</td>
-                    <td>{{ producto.stock }}</td>
-                    <td>
-                        <a href="{{ url_for('update_product', id=producto.id) }}" class="btn-actualizar">Actualizar</a>
-                        <form action="{{ url_for('delete_product', id=producto.id) }}" method="POST" style="display:inline;" onsubmit="return confirmarEliminacion(this)">
-                            <button type="submit" class="btn-eliminar">Eliminar</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        {% if productos %}
-        <footer>
-            <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
-            <p>&copy; 2025 Gestión de Inventarios</p>
-        </footer>
-        {% endif %}
+        <div class="logo">
+            <h1>GESTION <span>INVENTARIO</span></h1>
+        </div>
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="nombre">Usuario:</label>
+                <input type="text" id="nombre" name="nombre" required placeholder="Ingrese su usuario">
+            </div>
+            <div class="form-group">
+                <label for="contrasena">Contraseña:</label>
+                <input type="password" id="contrasena" name="contrasena" required placeholder="••••••••">
+            </div>
+            <button type="submit">ACCEDER</button>
+        </form>
+        <div class="footer">
+            <a href="{{ url_for('registro') }}">¿No tienes cuenta? <strong>Regístrate</strong></a>
+        </div>
     </div>
-
-    <script>
-        function confirmarEliminacion(form) {
-            return confirm("¿Seguro que quiere eliminar este producto del stock?");
-        }
-    </script>
-
 </body>
 </html>

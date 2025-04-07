@@ -11,18 +11,17 @@ class Producto(db.Model):
     categoria = db.Column(db.String(50), nullable=False)
     precio = db.Column(db.Numeric(10, 2), nullable=False)
     stock = db.Column(db.Integer, nullable=False)
-    transacciones = db.relationship('Transaccion', backref='producto', lazy=True)
+    transacciones = db.relationship('Transaccion', back_populates='producto', lazy=True)
 
 class Transaccion(db.Model):
     __tablename__ = 'transacciones'
     id = db.Column(db.Integer, primary_key=True)
-    tipo = db.Column(db.String(10), nullable=False)  # "entrada" o "salida"
+    tipo = db.Column(db.String(15), nullable=False)  # "entrada" o "salida"
     fecha = db.Column(db.DateTime, nullable=False)
-    producto_id = db.Column(db.Integer, db.ForeignKey('productos.id'), nullable=False)
+    producto_id = db.Column(db.Integer, db.ForeignKey('productos.id', ondelete='SET NULL'), nullable=True)
     cantidad = db.Column(db.Integer, nullable=False)
 
-
-
+    producto = db.relationship('Producto', back_populates='transacciones')
 
 class Usuario(db.Model, UserMixin):
     __tablename__="usuarios"
