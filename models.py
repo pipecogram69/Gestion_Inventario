@@ -27,7 +27,7 @@ class Usuario(db.Model, UserMixin):
     __tablename__="usuarios"
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False, unique=True)
-    contrasena = db.Column(db.String(100), nullable=False)
+    contrasena = db.Column(db.String(200), nullable=False)
     rol = db.Column(db.String(50), nullable=False, default='empleado')
 
     def __repr__(self):

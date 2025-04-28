@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from models import db, Producto, Transaccion, Usuario
-
+from werkzeug.security import generate_password_hash, check_password_hash  # Añade esto
 app = Flask(__name__)
 
 # Configuración de la aplicación
@@ -56,13 +56,12 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-
     if request.method == 'POST':
         nombre = request.form['nombre']
         contrasena = request.form['contrasena']
         usuario = Usuario.query.filter_by(nombre=nombre).first()
 
-        if usuario and usuario.contrasena == contrasena:
+        if usuario and check_password_hash(usuario.contrasena, contrasena):  # Cambia esta línea
             login_user(usuario)
             flash("Inicio de sesión exitoso", "success")
             return redirect(url_for('inventario'))
@@ -71,6 +70,46 @@ def login():
         return redirect(url_for('login'))
     
     return render_template('index.html')
+
+@app.route('/registro', methods=['GET', 'POST'])
+def registro():
+    """Registro de nuevos usuarios (solo para empleados)"""
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        contrasena = request.form['contrasena']
+        confirmar_contrasena = request.form.get('confirmar_contrasena', '')
+        
+        # Validaciones de contraseña
+        if contrasena != confirmar_contrasena:
+            flash("Las contraseñas no coinciden", "error")
+            return redirect(url_for('registro'))
+        
+        if len(contrasena) < 8:
+            flash("La contraseña debe tener al menos 8 caracteres", "error")
+            return redirect(url_for('registro'))
+        
+        if not any(c.isupper() for c in contrasena):
+            flash("La contraseña debe contener al menos una mayúscula", "error")
+            return redirect(url_for('registro'))
+        
+        if not any(c.isdigit() for c in contrasena):
+            flash("La contraseña debe contener al menos un número", "error")
+            return redirect(url_for('registro'))
+        
+        # Encriptar la contraseña antes de guardarla
+        contrasena_encriptada = generate_password_hash(contrasena)
+        
+        nuevo_usuario = Usuario(
+            nombre=nombre, 
+            rol='empleado', 
+            contrasena=contrasena_encriptada  # Guarda la versión encriptada
+        )
+        db.session.add(nuevo_usuario)
+        db.session.commit()
+
+        flash("Usuario registrado correctamente", "success")
+        return redirect(url_for('login'))
+    return render_template('registro.html')
 
 @app.route('/inventario')
 @login_required
@@ -108,20 +147,7 @@ def logout():
     flash("Sesión cerrada correctamente", "success")
     return redirect(url_for('login'))
 
-@app.route('/registro', methods=['GET', 'POST'])
-def registro():
-    """Registro de nuevos usuarios (solo para empleados)"""
-    if request.method == 'POST':
-        nombre = request.form['nombre']
-        contrasena = request.form['contrasena']
 
-        nuevo_usuario = Usuario(nombre=nombre, rol='empleado', contrasena=contrasena)
-        db.session.add(nuevo_usuario)
-        db.session.commit()
-
-        flash("Usuario registrado correctamente", "success")
-        return redirect(url_for('login'))
-    return render_template('registro.html')
 
 # Rutas de gestión de productos
 # =============================
