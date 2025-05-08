@@ -118,15 +118,25 @@ def inventario():
     if current_user.rol not in ['admin', 'superadmin']:
         return redirect(url_for('visualizar'))
     
-    # Obtener el parámetro de filtro (si existe)
+    # Obtener parámetros de filtro y ordenamiento
     categoria_filtro = request.args.get('categoria', '')
+    orden_stock = request.args.get('orden_stock', '')
     
     # Consulta base
-    query = Producto.query.order_by(Producto.id.asc())
+    query = Producto.query
     
     # Aplicar filtro si se especificó
     if categoria_filtro:
         query = query.filter_by(categoria=categoria_filtro)
+    
+    # Aplicar ordenamiento por stock
+    if orden_stock == 'mayor':
+        query = query.order_by(Producto.stock.desc())
+    elif orden_stock == 'menor':
+        query = query.order_by(Producto.stock.asc())
+    else:
+        # Orden por defecto (ID ascendente)
+        query = query.order_by(Producto.id.asc())
     
     productos = query.all()
     
@@ -137,7 +147,8 @@ def inventario():
     return render_template('inventario.html', 
                         productos=productos,
                         categorias=categorias,
-                        categoria_filtro=categoria_filtro)
+                        categoria_filtro=categoria_filtro,
+                        orden_stock=orden_stock)
 
 @app.route('/logout')
 @login_required

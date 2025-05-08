@@ -27,7 +27,14 @@
             
             <div class="form-group">
                 <label for="categoria">Categoría:</label>
-                <input type="text" id="categoria" name="categoria" required placeholder="Ej: Electrónica, Oficina">
+                <input list="categorias" id="categoria" name="categoria" required placeholder="Seleccione o escriba una categoría">
+                <datalist id="categorias">
+                    <option value="Electrónica">
+                    <option value="Oficina">
+                    <option value="Accesorios">
+                    <option value="Almacenamiento">
+                    <option value="Redes">
+                </datalist>
             </div>
             
             <div class="form-row">

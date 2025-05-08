@@ -536,3 +536,43 @@ form[style*="display:inline"] {
     from { opacity: 0.9; }
     to { opacity: 0; display: none; }
 }
+
+/* Estilos para el modal de confirmación */
+
+.sortable-header {
+    color: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.sortable-header:hover {
+    background-color: #f0f0f0;
+    color: #2c5ecc;
+}
+
+th {
+    position: relative;
+    padding: 12px 8px;
+    text-align: left;
+}
+
+.sortable-header {
+    color: inherit;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+.sortable-header:hover {
+    color: #2c5ecc;
+}
+.sort-icon {
+    margin-left: 5px;
+    font-size: 0.9em;
+}

@@ -6,6 +6,7 @@
     <title>Inventario - Sistema de Gestión</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='css/folder.png') }}">
+   
 </head>
 <body>
     <div class="container">
@@ -58,7 +59,19 @@
                         <th>Descripción</th>
                         <th>Categoría</th>
                         <th>Precio</th>
-                        <th>Stock</th>
+                        <th>
+                            <a href="{{ url_for('inventario', 
+                                categoria=categoria_filtro, 
+                                orden_stock='menor' if orden_stock == 'mayor' else 'mayor') }}" 
+                               class="sortable-header">
+                                Stock
+                                <span class="sort-icon">
+                                    {% if orden_stock == 'mayor' %}↓
+                                    {% elif orden_stock == 'menor' %}↑
+                                    {% endif %}
+                                </span>
+                            </a>
+                        </th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
