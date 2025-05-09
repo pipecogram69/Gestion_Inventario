@@ -6,6 +6,7 @@
     <title>Visualizar Inventario</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='css/folder.png') }}">
+   
 </head>
 <body>
     <div class="container">
@@ -22,10 +23,10 @@
                         <th>DESCRIPCIÓN</th>
                         <th>CATEGORÍA</th>
                         <th>PRECIO</th>
-                        <th>STOCK</th>
+                        <th class="sortable" onclick="sortTable(4)">STOCK</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="inventory-body">
                     {% for producto in productos %}
                     <tr>
                         <td>{{ producto.nombre }}</td>
@@ -35,9 +36,16 @@
                         </td>
                         <td class="price">${{ "%.2f"|format(producto.precio) }}</td>
                         <td class="stock {% if producto.stock < 10 %}low-stock{% endif %}">
+                            {% if producto.stock > 20 %}
+                                <span class="stock-indicator stock-high"></span>
+                            {% elif producto.stock >= 10 %}
+                                <span class="stock-indicator stock-medium"></span>
+                            {% else %}
+                                <span class="stock-indicator stock-low"></span>
+                            {% endif %}
                             {{ producto.stock }}
                             {% if producto.stock < 10 %}
-                            <span class="stock-warning">!</span>
+                         
                             {% endif %}
                         </td>
                     </tr>
@@ -53,10 +61,52 @@
         </div>
 
         <footer>
-            <a href="{{ url_for('logout') }}" class="btn-logout">CERRAR SESIÓN
-            </a>
+            <a href="{{ url_for('logout') }}" class="btn-logout">CERRAR SESIÓN</a>
             <p>Sistema de Inventarios &copy; 2025</p>
         </footer>
     </div>
+
+    <script>
+        let currentSortDirection = 'desc'; // Comienza ordenando de mayor a menor
+        
+        function sortTable(columnIndex) {
+            const table = document.querySelector('table');
+            const tbody = document.getElementById('inventory-body');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const header = table.querySelectorAll('th')[columnIndex];
+            
+            // Remover clases de ordenamiento de todos los encabezados
+            document.querySelectorAll('th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            });
+            
+            // Alternar dirección de ordenamiento
+            if (currentSortDirection === 'desc') {
+                currentSortDirection = 'asc';
+                header.classList.add('sorted-asc');
+            } else {
+                currentSortDirection = 'desc';
+                header.classList.add('sorted-desc');
+            }
+            
+            // Ordenar las filas
+            rows.sort((a, b) => {
+                const aValue = parseInt(a.cells[columnIndex].textContent.trim().replace('¡REPONER!', '').trim());
+                const bValue = parseInt(b.cells[columnIndex].textContent.trim().replace('¡REPONER!', '').trim());
+                
+                return currentSortDirection === 'asc' 
+                    ? aValue - bValue 
+                    : bValue - aValue;
+            });
+            
+            // Reinsertar las filas ordenadas
+            rows.forEach(row => tbody.appendChild(row));
+        }
+        
+        // Ordenar inicialmente por stock (mayor a menor)
+        document.addEventListener('DOMContentLoaded', function() {
+            sortTable(4); // La columna STOCK es la 4 (0-indexed)
+        });
+    </script>
 </body>
 </html>
