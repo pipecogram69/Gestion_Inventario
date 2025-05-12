@@ -79,6 +79,12 @@ def registro():
         contrasena = request.form['contrasena']
         confirmar_contrasena = request.form.get('confirmar_contrasena', '')
         
+        # Verificar si el usuario ya existe
+        usuario_existente = Usuario.query.filter_by(nombre=nombre).first()
+        if usuario_existente:
+            flash("El nombre de usuario ya está en uso", "error")
+            return redirect(url_for('registro'))
+        
         # Validaciones de contraseña
         if contrasena != confirmar_contrasena:
             flash("Las contraseñas no coinciden", "error")
@@ -102,7 +108,7 @@ def registro():
         nuevo_usuario = Usuario(
             nombre=nombre, 
             rol='empleado', 
-            contrasena=contrasena_encriptada  # Guarda la versión encriptada
+            contrasena=contrasena_encriptada
         )
         db.session.add(nuevo_usuario)
         db.session.commit()
